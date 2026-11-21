@@ -1,149 +1,201 @@
-/* Style général */
+/* Dikkat ve İnhibisyon Görevleri — özgün eser: Cognitive Arcade (Anyma-exe, MIT). Türkçe uyarlamada mobil düzen,
+   dokunmatik düğmeler, açıklama kutuları ve sonuç tablosu eklendi. */
+:root {
+  --zemin: #1a1a2e;
+  --kart: #16213e;
+  --vurgu: #e94560;
+  --vurgu-koyu: #c73652;
+  --soluk: #b4b9c6;
+  --cizgi: #2c3a63;
+}
+
+* { box-sizing: border-box; }
+
 body {
-  font-family: Arial, sans-serif;
-  background-color: #1a1a2e;
-  color: white;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  background-color: var(--zemin);
+  color: #fff;
+  margin: 0;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  margin: 0;
+  align-items: flex-start;
   text-align: center;
+  line-height: 1.5;
 }
 
-/* Cache les éléments */
-.cache {
-  display: none;
+.cache { display: none !important; }
+
+a { color: #8fd3ff; }
+
+kbd {
+  font: inherit;
+  font-size: .85em;
+  padding: 1px 6px;
+  border: 1px solid var(--soluk);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, .08);
 }
 
-/* Menu principal */
-#menu-principal {
-  max-width: 700px;
-  padding: 40px;
+/* Ana menü ve görev alanları */
+#menu-principal, #jeu-stroop, #jeu-nback, #jeu-gonogo {
+  width: 100%;
+  max-width: 720px;
+  padding: 32px 16px 48px;
 }
+
+h1 { font-size: 1.7rem; margin: 8px 0 12px; }
+h2 { font-size: 1.3rem; }
 
 .sous-titre {
-  color: #aaaaaa;
-  font-size: 18px;
-  margin-bottom: 40px;
+  color: var(--soluk);
+  font-size: 1.05rem;
+  margin: 0 auto 20px;
+  max-width: 560px;
 }
 
-/* Les cartes de jeux */
+.uyari {
+  border: 1px solid #f39c12;
+  background: rgba(243, 156, 18, .1);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 0 auto 24px;
+  max-width: 600px;
+  font-size: .95rem;
+  text-align: left;
+}
+.uyari.kucuk { font-size: .85rem; margin-top: 16px; }
+
 #liste-jeux {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   justify-content: center;
   flex-wrap: wrap;
+  margin-bottom: 28px;
 }
 
 .carte-jeu {
-  background-color: #16213e;
-  border: 2px solid #e94560;
+  background-color: var(--kart);
+  border: 2px solid var(--vurgu);
   border-radius: 15px;
-  padding: 30px 25px;
-  width: 160px;
-  cursor: pointer;
-  transition: transform 0.2s, background-color 0.2s;
-}
-
-.carte-jeu:hover {
-  transform: scale(1.05);
-  background-color: #e94560;
-}
-
-.emoji-jeu {
-  font-size: 40px;
-  margin-bottom: 10px;
-}
-
-.carte-jeu h2 {
-  font-size: 18px;
-  margin: 5px 0;
-}
-
-.carte-jeu p {
-  font-size: 13px;
-  color: #cccccc;
+  padding: 24px 16px;
+  width: 190px;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: transform .2s, background-color .2s;
 }
+.carte-jeu:hover { transform: scale(1.04); background-color: var(--vurgu); }
+.emoji-jeu { font-size: 40px; }
+.carte-ad { font-size: 1.15rem; font-weight: 700; white-space: nowrap; }
+.carte-alt { font-size: .82rem; color: #d5d9e3; }
 
-/* Écrans de jeu */
-#jeu-stroop, #jeu-nback, #jeu-gonogo {
-  max-width: 600px;
-  padding: 40px;
+/* Açıklama kutuları */
+details.bilgi {
+  text-align: left;
+  background: var(--kart);
+  border: 1px solid var(--cizgi);
+  border-radius: 12px;
+  padding: 10px 16px;
+  margin: 14px auto;
+  max-width: 640px;
+  font-size: .95rem;
 }
+details.bilgi summary { cursor: pointer; font-weight: 700; }
+details.bilgi ul { padding-left: 20px; margin: 10px 0 4px; }
+details.bilgi li { margin-bottom: 8px; }
+ul.kaynak { font-size: .85rem; color: #d5d9e3; overflow-wrap: anywhere; }
 
-/* Le mot coloré Stroop */
+.kunye { font-size: .8rem; color: var(--soluk); margin-top: 24px; }
+.tuslar { color: var(--soluk); font-size: .92rem; }
+
+/* Uyaranlar */
 #mot-affiche {
-  font-size: 80px;
-  font-weight: bold;
-  margin: 40px 0;
-  letter-spacing: 4px;
+  font-size: clamp(44px, 14vw, 80px);
+  font-weight: 700;
+  margin: 28px 0;
+  min-height: 1.3em;
+  letter-spacing: 3px;
 }
+.ink-k { color: #ff5a4d; }
+.ink-m { color: #4aa8ff; }
+.ink-s { color: #ffd23f; }
 
-/* La lettre N-Back */
 #lettre-affichee {
-  font-size: 120px;
-  font-weight: bold;
-  margin: 30px 0;
-  color: #e94560;
-  transition: opacity 0.1s;
+  font-size: clamp(80px, 26vw, 120px);
+  font-weight: 700;
+  margin: 20px 0;
+  min-height: 1.3em;
+  color: var(--vurgu);
 }
 
-/* Bordure lumineuse pour les lettres cibles N-Back */
-.bordure-cible {
-  text-shadow:
-    0 0 20px #ffffff,
-    0 0 40px #e94560,
-    0 0 60px #e94560;
-  transition: text-shadow 0.1s;
-}
-
-/* Le symbole Go/No-Go */
 #symbole-affiche {
-  font-size: 120px;
-  margin: 30px 0;
-  transition: opacity 0.15s;
+  font-size: clamp(80px, 26vw, 120px);
+  margin: 20px 0;
+  min-height: 1.3em;
 }
 
-/* Boutons */
+/* Düğmeler */
 button {
-  background-color: #e94560;
-  color: white;
+  font: inherit;
+  background-color: var(--vurgu);
+  color: #fff;
   border: none;
-  padding: 15px 40px;
-  font-size: 18px;
+  padding: 14px 32px;
+  font-size: 1.05rem;
   border-radius: 10px;
   cursor: pointer;
-  margin: 10px;
+  margin: 8px;
+  touch-action: manipulation;
 }
+button:hover { background-color: var(--vurgu-koyu); }
+button:focus-visible, summary:focus-visible, a:focus-visible { outline: 3px solid #8fd3ff; outline-offset: 2px; }
 
-button:hover {
-  background-color: #c73652;
-}
-
-/* Bouton retour */
 .bouton-retour {
   background-color: transparent;
-  border: 2px solid #aaaaaa;
-  color: #aaaaaa;
-  padding: 8px 20px;
-  font-size: 14px;
+  border: 2px solid var(--soluk);
+  color: var(--soluk);
+  padding: 8px 18px;
+  font-size: .9rem;
+}
+.bouton-retour:hover { background-color: var(--soluk); color: var(--zemin); }
+
+.dugmeler { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 8px 0; }
+.dugmeler button { margin: 0; min-height: 56px; -webkit-user-select: none; user-select: none; }
+.renk { flex: 1 1 96px; max-width: 170px; padding: 14px 8px; background: var(--kart); border: 2px solid var(--cizgi); }
+.renk:hover { background: #1f2c52; }
+.yanit { min-width: 220px; }
+
+.seviye { margin: 6px 0; }
+.sec { background: var(--kart); border: 2px solid var(--cizgi); padding: 8px 20px; font-size: .95rem; margin: 4px; }
+.sec.is-on { border-color: var(--vurgu); background: rgba(233, 69, 96, .2); }
+
+/* Geri bildirim ve sayaç */
+.geri { font-size: 1.4rem; font-weight: 700; min-height: 2.2rem; margin: 8px 0; }
+.geri.ok { color: #2ecc71; }
+.geri.hata { color: #ff6b5e; }
+.geri.uyar { color: #f39c12; }
+.sayac { font-size: 1rem; color: var(--soluk); }
+
+/* Sonuç */
+table.sonuc { margin: 12px auto; border-collapse: collapse; text-align: left; width: 100%; max-width: 520px; }
+table.sonuc th, table.sonuc td { padding: 8px 10px; border-bottom: 1px solid var(--cizgi); font-size: .98rem; }
+table.sonuc th { font-weight: 400; color: #d5d9e3; }
+table.sonuc td { font-weight: 700; text-align: right; white-space: nowrap; }
+.yorum { max-width: 560px; margin: 14px auto; text-align: left; font-size: .95rem; }
+
+@media (max-width: 520px) {
+  #menu-principal, #jeu-stroop, #jeu-nback, #jeu-gonogo { padding-top: 20px; }
+  h1 { font-size: 1.4rem; }
+  .carte-jeu { width: 100%; flex-direction: row; justify-content: flex-start; text-align: left; gap: 12px; padding: 14px 16px; }
+  .emoji-jeu { font-size: 30px; }
+  .carte-alt { margin-left: auto; text-align: right; }
+  table.sonuc td { white-space: normal; }
 }
 
-.bouton-retour:hover {
-  background-color: #aaaaaa;
-  color: #1a1a2e;
-}
-
-/* Feedback */
-#feedback-stroop, #feedback-nback, #feedback-gonogo {
-  font-size: 28px;
-  font-weight: bold;
-  height: 40px;
-}
-
-#compteur-stroop, #compteur-nback, #compteur-gonogo {
-  font-size: 18px;
-  color: #aaaaaa;
+@media (prefers-reduced-motion: reduce) {
+  .carte-jeu { transition: none; }
+  .carte-jeu:hover { transform: none; }
 }

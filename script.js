@@ -1,8 +1,12 @@
 // ============================================
-// 🧠 COGNITIVE ARCADE — script.js
+// Dikkat ve İnhibisyon Görevleri — script.js
+// Özgün eser: Cognitive Arcade, Anyma-exe (2026), MIT lisansı.
+// Türkçe uyarlama: Doç. Dr. Miraç Barış Usta. Değişiklikler UYARLAMA.md dosyasında.
+// Hiçbir veri kaydedilmez ya da gönderilmez.
 // ============================================
+"use strict";
 
-// --- NAVIGATION ENTRE LES ÉCRANS ---
+// --- EKRANLAR ARASI GEÇİŞ ---
 
 const menuPrincipal = document.getElementById("menu-principal");
 const jeuStroop     = document.getElementById("jeu-stroop");
@@ -10,44 +14,83 @@ const jeuNback      = document.getElementById("jeu-nback");
 const jeuGonogo     = document.getElementById("jeu-gonogo");
 
 function afficherEcran(ecran) {
-  menuPrincipal.classList.add("cache");
-  jeuStroop.classList.add("cache");
-  jeuNback.classList.add("cache");
-  jeuGonogo.classList.add("cache");
+  durdurHepsi();
+  for (const e of [menuPrincipal, jeuStroop, jeuNback, jeuGonogo]) e.classList.add("cache");
   ecran.classList.remove("cache");
+  window.scrollTo(0, 0);
 }
 
-document.getElementById("btn-stroop").addEventListener("click", () => afficherEcran(jeuStroop));
-document.getElementById("btn-nback").addEventListener("click",  () => afficherEcran(jeuNback));
-document.getElementById("btn-gonogo").addEventListener("click", () => afficherEcran(jeuGonogo));
+// Bir görevi açarken her seferinde giriş ekranından başla
+function gorevAc(jeu, accueil, ecranJeu, resultats) {
+  accueil.classList.remove("cache");
+  ecranJeu.classList.add("cache");
+  resultats.classList.add("cache");
+  afficherEcran(jeu);
+}
 
-document.getElementById("retour-stroop").addEventListener("click",            () => afficherEcran(menuPrincipal));
-document.getElementById("retour-nback").addEventListener("click",             () => afficherEcran(menuPrincipal));
-document.getElementById("retour-gonogo").addEventListener("click",            () => afficherEcran(menuPrincipal));
-document.getElementById("retour-resultats-stroop").addEventListener("click",  () => afficherEcran(menuPrincipal));
-document.getElementById("retour-resultats-nback").addEventListener("click",   () => afficherEcran(menuPrincipal));
-document.getElementById("retour-resultats-gonogo").addEventListener("click",  () => afficherEcran(menuPrincipal));
+function auHasard(tableau) {
+  return tableau[Math.floor(Math.random() * tableau.length)];
+}
+
+function karistir(tableau) {
+  const t = tableau.slice();
+  for (let i = t.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [t[i], t[j]] = [t[j], t[i]];
+  }
+  return t;
+}
+
+function ortalama(dizi) {
+  return dizi.length ? Math.round(dizi.reduce((a, b) => a + b, 0) / dizi.length) : null;
+}
+
+function ms(v) {
+  return v === null ? "ölçülemedi" : v + " ms";
+}
+
+function yuzde(pay, payda) {
+  return payda > 0 ? Math.round((pay / payda) * 100) : 0;
+}
+
+// Sonuç tablosu: [etiket, değer] satırları
+function tabloYaz(id, satirlar) {
+  const tbody = document.getElementById(id);
+  tbody.textContent = "";
+  for (const [etiket, deger] of satirlar) {
+    const tr = document.createElement("tr");
+    const th = document.createElement("th");
+    const td = document.createElement("td");
+    th.scope = "row";
+    th.textContent = etiket;
+    td.textContent = deger;
+    tr.append(th, td);
+    tbody.append(tr);
+  }
+}
+
+function geriBildirim(el, metin, sinif) {
+  el.textContent = metin;
+  el.className = "geri" + (sinif ? " " + sinif : "");
+}
 
 // ============================================
-// 🎨 STROOP TEST
+// STROOP
 // ============================================
 
-const MOTS     = ["RED", "BLUE", "GREEN"];
 const COULEURS = [
-  { nom: "RED", code: "#e74c3c", touche: "r" },
-  { nom: "BLUE",  code: "#3498db", touche: "b" },
-  { nom: "GREEN",  code: "#2ecc71", touche: "g" }
+  { nom: "KIRMIZI", sinif: "ink-k", touche: "k" },
+  { nom: "MAVİ",    sinif: "ink-m", touche: "m" },
+  { nom: "SARI",    sinif: "ink-s", touche: "s" }
 ];
-const NOMBRE_ESSAIS_STROOP = 20;
+const NOMBRE_ESSAIS_STROOP = 24; // 12 uyumlu + 12 uyumsuz
 
+let listeStroop      = [];
 let essaiStroop      = 0;
-let scoreStroop      = 0;
 let tempsDebutStroop = 0;
-let totalTempsStroop = 0;
-let motCourant       = "";
-let couleurCourante  = null;
 let enAttenteStroop  = false;
 let resultatsStroop  = [];
+let timerStroop      = null;
 
 const ecranAccueilStroop   = document.getElementById("ecran-accueil-stroop");
 const ecranJeuStroop       = document.getElementById("ecran-jeu-stroop");
@@ -56,122 +99,120 @@ const motAffiche           = document.getElementById("mot-affiche");
 const feedbackStroop       = document.getElementById("feedback-stroop");
 const compteurStroop       = document.getElementById("compteur-stroop");
 
-function auHasard(tableau) {
-  return tableau[Math.floor(Math.random() * tableau.length)];
+// Dengeli liste: her renk 4 kez uyumlu, 4 kez uyumsuz (iki öteki sözcükle ikişer kez)
+function listeStroopKur() {
+  const liste = [];
+  for (const couleur of COULEURS) {
+    for (let i = 0; i < 4; i++) liste.push({ mot: couleur.nom, couleur, type: "uyumlu" });
+    for (const autre of COULEURS) {
+      if (autre === couleur) continue;
+      for (let i = 0; i < 2; i++) liste.push({ mot: autre.nom, couleur, type: "uyumsuz" });
+    }
+  }
+  return karistir(liste);
 }
 
 function nouvelEssaiStroop() {
-  enAttenteStroop = true;
-  motCourant      = auHasard(MOTS);
-  couleurCourante = auHasard(COULEURS);
-
-  motAffiche.textContent     = motCourant;
-  motAffiche.style.color     = couleurCourante.code;
-  compteurStroop.textContent = `Essai : ${essaiStroop + 1} / ${NOMBRE_ESSAIS_STROOP}`;
-  feedbackStroop.textContent = "";
-  tempsDebutStroop           = Date.now();
+  const essai = listeStroop[essaiStroop];
+  motAffiche.textContent     = essai.mot;
+  motAffiche.className       = essai.couleur.sinif;
+  compteurStroop.textContent = `Deneme ${essaiStroop + 1} / ${NOMBRE_ESSAIS_STROOP}`;
+  geriBildirim(feedbackStroop, "");
+  tempsDebutStroop = performance.now();
+  enAttenteStroop  = true;
 }
 
 function traiterReponseStroop(toucheAppuyee) {
   if (!enAttenteStroop) return;
   enAttenteStroop = false;
 
-  const tempsReaction = Date.now() - tempsDebutStroop;
-  const bonneTouche   = couleurCourante.touche;
-  const correct       = (toucheAppuyee === bonneTouche);
-  const typeEssai     = (motCourant === couleurCourante.nom) ? "congruent" : "incongruent";
+  const tempsReaction = Math.round(performance.now() - tempsDebutStroop);
+  const essai   = listeStroop[essaiStroop];
+  const correct = (toucheAppuyee === essai.couleur.touche);
 
-  if (correct) {
-    scoreStroop++;
-    totalTempsStroop += tempsReaction;
-    feedbackStroop.textContent = "✅ Correct !";
-    feedbackStroop.style.color = "#2ecc71";
-  } else {
-    feedbackStroop.textContent = "❌ Failed !";
-    feedbackStroop.style.color = "#e74c3c";
-  }
-
-  resultatsStroop.push({
-    essai: essaiStroop + 1,
-    mot: motCourant,
-    couleur: couleurCourante.nom,
-    type: typeEssai,
-    correct: correct,
-    tempsReaction: tempsReaction
-  });
+  geriBildirim(feedbackStroop, correct ? "Doğru" : "Yanlış", correct ? "ok" : "hata");
+  resultatsStroop.push({ type: essai.type, correct, tempsReaction });
 
   essaiStroop++;
-
-  if (essaiStroop >= NOMBRE_ESSAIS_STROOP) {
-    setTimeout(afficherResultatsStroop, 800);
-  } else {
-    setTimeout(nouvelEssaiStroop, 600);
-  }
+  motAffiche.textContent = "";
+  timerStroop = setTimeout(
+    essaiStroop >= NOMBRE_ESSAIS_STROOP ? afficherResultatsStroop : nouvelEssaiStroop,
+    600
+  );
 }
 
 function afficherResultatsStroop() {
   ecranJeuStroop.classList.add("cache");
   ecranResultatsStroop.classList.remove("cache");
 
-  const precision    = Math.round((scoreStroop / NOMBRE_ESSAIS_STROOP) * 100);
-  const tempsMoyenMs = scoreStroop > 0 ? Math.round(totalTempsStroop / scoreStroop) : 0;
+  const uyumlu  = resultatsStroop.filter(r => r.type === "uyumlu");
+  const uyumsuz = resultatsStroop.filter(r => r.type === "uyumsuz");
+  const trU  = ortalama(uyumlu.filter(r => r.correct).map(r => r.tempsReaction));
+  const trUs = ortalama(uyumsuz.filter(r => r.correct).map(r => r.tempsReaction));
+  const fark = (trU !== null && trUs !== null) ? trUs - trU : null;
 
-  let diagnostic  = "";
-  let couleurDiag = "";
+  tabloYaz("tablo-stroop", [
+    ["Uyumlu denemeler: doğru",  `${uyumlu.filter(r => r.correct).length} / ${uyumlu.length}`],
+    ["Uyumsuz denemeler: doğru", `${uyumsuz.filter(r => r.correct).length} / ${uyumsuz.length}`],
+    ["Uyumlu: ortalama tepki süresi",  ms(trU)],
+    ["Uyumsuz: ortalama tepki süresi", ms(trUs)],
+    ["Girişim etkisi (uyumsuz − uyumlu)", fark === null ? "hesaplanamadı" : (fark > 0 ? "+" : "") + fark + " ms"]
+  ]);
 
-  if (tempsMoyenMs < 600) {
-    diagnostic  = "🟢 Excellent! You're very resistant to interference.";
-    couleurDiag = "#2ecc71";
-  } else if (tempsMoyenMs < 900) {
-    diagnostic  = "🟡 Attention is average. The Stroop effect is well managed.";
-    couleurDiag = "#f39c12";
+  let yorum;
+  if (fark === null) {
+    yorum = "Doğru yanıt sayısı fark hesaplamaya yetmedi. Tepki süreleri yalnızca doğru denemelerden hesaplanır.";
+  } else if (fark > 0) {
+    yorum = "Uyumsuz denemelerde yavaşladınız: bu, Stroop girişim etkisidir ve hemen herkeste görülür. Farkın büyüklüğü 12 denemelik bir ortalamaya dayanır; birkaç yavaş deneme sonucu belirgin biçimde değiştirir.";
   } else {
-    diagnostic  = "🔴 Marked Stroop effect. Your brain is strongly influenced by automatic reading—it’s normal!";
-    couleurDiag = "#e74c3c";
+    yorum = "Bu oturumda uyumsuz denemelerde yavaşlama görülmedi. 12 denemelik ortalamalar oynaktır; etki grup düzeyinde çok sağlamdır ama tek oturumda her zaman ortaya çıkmaz.";
   }
-
-  document.getElementById("score-final-stroop").textContent = `🎯 Precision : ${precision}% (${scoreStroop}/${NOMBRE_ESSAIS_STROOP} corrects)`;
-  document.getElementById("temps-moyen-stroop").textContent = `⏱️ Average reaction time : ${tempsMoyenMs} ms`;
-  document.getElementById("diagnostic-stroop").textContent  = diagnostic;
-  document.getElementById("diagnostic-stroop").style.color  = couleurDiag;
+  document.getElementById("diagnostic-stroop").textContent = yorum;
 }
 
 function demarrerStroop() {
-  essaiStroop      = 0;
-  scoreStroop      = 0;
-  totalTempsStroop = 0;
-  resultatsStroop  = [];
+  clearTimeout(timerStroop);
+  listeStroop     = listeStroopKur();
+  essaiStroop     = 0;
+  resultatsStroop = [];
 
   ecranAccueilStroop.classList.add("cache");
   ecranResultatsStroop.classList.add("cache");
   ecranJeuStroop.classList.remove("cache");
 
-  nouvelEssaiStroop();
+  motAffiche.textContent = "";
+  geriBildirim(feedbackStroop, "");
+  compteurStroop.textContent = "Hazır olun";
+  timerStroop = setTimeout(nouvelEssaiStroop, 1000);
 }
 
 document.getElementById("bouton-start-stroop").addEventListener("click", demarrerStroop);
 document.getElementById("bouton-restart-stroop").addEventListener("click", demarrerStroop);
+// pointerdown: dokunmatik ekranda tıklama gecikmesi tepki süresine eklenmesin; click klavyeyle etkinleştirme içindir
+for (const olay of ["pointerdown", "click"]) {
+  document.getElementById("dugmeler-stroop").addEventListener(olay, e => {
+    const b = e.target.closest("button[data-touche]");
+    if (b) traiterReponseStroop(b.dataset.touche);
+  });
+}
 
 // ============================================
-// 🔢 N-BACK
+// N-GERİ
 // ============================================
 
-const LETTRES             = ["A", "B", "C", "D", "E", "F", "G", "H"];
-const NOMBRE_ESSAIS_NBACK = 20;
-const DUREE_LETTRE        = 1500;
-const DUREE_PAUSE         = 800;
-const DUREE_MASQUE        = 400;
+// Türkçe klavyede ve seslendirmede karışmayan sessiz harfler
+const LETTRES             = ["B", "D", "F", "H", "K", "M", "R", "T"];
+const NOMBRE_ESSAIS_NBACK = 25;
+const DUREE_LETTRE        = 1500; // harfin ekranda kalma ve yanıt süresi
+const DUREE_PAUSE         = 700;
 
-let essaiNback       = 0;
-let lettreActuelle   = "";
-let lettrePrecedente = "";
-let enAttenteNback   = false;
-let aRepondu         = false;
-let vraisPositifs    = 0;
-let fauxPositifs     = 0;
-let omissions        = 0;
-let timerNback       = null;
-let resultatsNback   = [];
+let nSeviye        = 1;
+let diziNback      = [];
+let essaiNback     = 0;
+let enAttenteNback = false;
+let aRepondu       = false;
+let timerNback     = null;
+let resultatsNback = [];
 
 const ecranAccueilNback   = document.getElementById("ecran-accueil-nback");
 const ecranJeuNback       = document.getElementById("ecran-jeu-nback");
@@ -180,82 +221,51 @@ const lettrAffichee       = document.getElementById("lettre-affichee");
 const feedbackNback       = document.getElementById("feedback-nback");
 const compteurNback       = document.getElementById("compteur-nback");
 
+// Hedeflerin yaklaşık üçte biri: konumları önceden seçilir, dizi ona göre üretilir
+function diziNbackKur(n) {
+  const uygun = [];
+  for (let i = n; i < NOMBRE_ESSAIS_NBACK; i++) uygun.push(i);
+  const hedefler = new Set(karistir(uygun).slice(0, Math.round(uygun.length * 0.33)));
+  const dizi = [];
+  for (let i = 0; i < NOMBRE_ESSAIS_NBACK; i++) {
+    if (hedefler.has(i)) {
+      dizi.push({ lettre: dizi[i - n].lettre, estCible: true });
+    } else {
+      let lettre;
+      do { lettre = auHasard(LETTRES); } while (i >= n && lettre === dizi[i - n].lettre);
+      dizi.push({ lettre, estCible: false });
+    }
+  }
+  return dizi;
+}
+
 function nouvelEssaiNback() {
   if (essaiNback >= NOMBRE_ESSAIS_NBACK) {
     afficherResultatsNback();
     return;
   }
-
-  lettrePrecedente = lettreActuelle;
-
-  const estCible = (essaiNback > 0) && (Math.random() < 0.3);
-  if (estCible) {
-    lettreActuelle = lettrePrecedente;
-  } else {
-    let nouvelleLetre;
-    do {
-      nouvelleLetre = auHasard(LETTRES);
-    } while (nouvelleLetre === lettrePrecedente);
-    lettreActuelle = nouvelleLetre;
-  }
-
-  // Flash si cible : on cache 400ms puis on réaffiche
-  if (estCible && essaiNback > 0) {
-    lettrAffichee.textContent = "";
-    setTimeout(() => {
-      afficherLettreNback(estCible);
-    }, DUREE_MASQUE);
-  } else {
-    afficherLettreNback(estCible);
-  }
+  lettrAffichee.textContent = diziNback[essaiNback].lettre;
+  geriBildirim(feedbackNback, "");
+  aRepondu       = false;
+  enAttenteNback = true;
+  compteurNback.textContent = `Harf ${essaiNback + 1} / ${NOMBRE_ESSAIS_NBACK}`;
+  timerNback = setTimeout(evaluerReponseNback, DUREE_LETTRE);
 }
 
-function afficherLettreNback(estCible) {
-  lettrAffichee.textContent = lettreActuelle;
-  feedbackNback.textContent = "";
-  aRepondu                  = false;
-  enAttenteNback            = true;
-
-  // Bordure lumineuse si cible
-  if (estCible) {
-    lettrAffichee.classList.add("bordure-cible");
-    setTimeout(() => {
-      lettrAffichee.classList.remove("bordure-cible");
-    }, 400);
-  }
-
-  compteurNback.textContent = `Essai : ${essaiNback + 1} / ${NOMBRE_ESSAIS_NBACK}`;
-
-  timerNback = setTimeout(() => {
-    evaluerReponseNback(estCible);
-  }, DUREE_LETTRE);
+function reponseNback() {
+  if (!enAttenteNback || aRepondu) return;
+  aRepondu = true;
+  const estCible = diziNback[essaiNback].estCible;
+  geriBildirim(feedbackNback, estCible ? "Doğru" : "Yanlış alarm", estCible ? "ok" : "hata");
 }
 
-function evaluerReponseNback(estCible) {
-  enAttenteNback        = false;
+function evaluerReponseNback() {
+  enAttenteNback = false;
+  const estCible = diziNback[essaiNback].estCible;
   lettrAffichee.textContent = "";
+  if (estCible && !aRepondu) geriBildirim(feedbackNback, "Kaçtı", "uyar");
 
-  if (estCible && !aRepondu) {
-    omissions++;
-    feedbackNback.textContent = "⚠️ Missed !";
-    feedbackNback.style.color = "#f39c12";
-  } else if (!estCible && aRepondu) {
-    fauxPositifs++;
-    feedbackNback.textContent = "❌ Error !";
-    feedbackNback.style.color = "#e74c3c";
-  } else if (estCible && aRepondu) {
-    vraisPositifs++;
-    feedbackNback.textContent = "✅ Correct !";
-    feedbackNback.style.color = "#2ecc71";
-  }
-
-  resultatsNback.push({
-    essai: essaiNback + 1,
-    lettre: lettreActuelle,
-    estCible: estCible,
-    aRepondu: aRepondu
-  });
-
+  resultatsNback.push({ estCible, aRepondu });
   essaiNback++;
   timerNback = setTimeout(nouvelEssaiNback, DUREE_PAUSE);
 }
@@ -264,69 +274,78 @@ function afficherResultatsNback() {
   ecranJeuNback.classList.add("cache");
   ecranResultatsNback.classList.remove("cache");
 
-  const totalCibles = resultatsNback.filter(r => r.estCible).length;
-  const precision   = totalCibles > 0
-    ? Math.round((vraisPositifs / totalCibles) * 100)
-    : 0;
+  const cibles       = resultatsNback.filter(r => r.estCible);
+  const nonCibles    = resultatsNback.filter(r => !r.estCible);
+  const isabet       = cibles.filter(r => r.aRepondu).length;
+  const yanlisAlarm  = nonCibles.filter(r => r.aRepondu).length;
 
-  let diagnostic  = "";
-  let couleurDiag = "";
+  tabloYaz("tablo-nback", [
+    ["Düzey", `${nSeviye}-geri`],
+    ["İsabet (yakalanan hedef)", `${isabet} / ${cibles.length} (%${yuzde(isabet, cibles.length)})`],
+    ["Kaçırılan hedef", `${cibles.length - isabet} / ${cibles.length}`],
+    ["Yanlış alarm (hedef olmayana yanıt)", `${yanlisAlarm} / ${nonCibles.length} (%${yuzde(yanlisAlarm, nonCibles.length)})`]
+  ]);
 
-  if (precision >= 80) {
-    diagnostic  = "🟢 Excellent working memory ! You detect targets well.";
-    couleurDiag = "#2ecc71";
-  } else if (precision >= 50) {
-    diagnostic  = "🟡 Working memory is average. Keep practicing !";
-    couleurDiag = "#f39c12";
-  } else {
-    diagnostic  = "🔴 The N-Back task is difficult ! That's normal for a first attempt.";
-    couleurDiag = "#e74c3c";
-  }
-
-  document.getElementById("score-final-nback").textContent = `🎯 Precision : ${precision}% (${vraisPositifs}/${totalCibles} targets detected)`;
-  document.getElementById("details-nback").textContent     = `❌ False positives : ${fauxPositifs} | ⚠️ Omissions : ${omissions}`;
-  document.getElementById("diagnostic-nback").textContent  = diagnostic;
-  document.getElementById("diagnostic-nback").style.color  = couleurDiag;
+  let yorum = "İsabet ve yanlış alarm birlikte okunur: çok isabet, çok da yanlış alarm varsa kişi ayırt etmiyor, sık basıyordur.";
+  if (nSeviye === 1) yorum += " 1-geri çoğu erişkin için kolaydır; güncelleme yükünü görmek için 2-geri düzeyini deneyin.";
+  else yorum += " 2-geri düzeyinde her yeni harfte akılda tutulan ikiliyi yenilemek gerekir; hataların artması beklenen bir bulgudur.";
+  document.getElementById("diagnostic-nback").textContent = yorum;
 }
 
 function demarrerNback() {
-  essaiNback       = 0;
-  lettreActuelle   = "";
-  lettrePrecedente = "";
-  vraisPositifs    = 0;
-  fauxPositifs     = 0;
-  omissions        = 0;
-  resultatsNback   = [];
+  clearTimeout(timerNback);
+  diziNback      = diziNbackKur(nSeviye);
+  essaiNback     = 0;
+  resultatsNback = [];
+  enAttenteNback = false;
 
   ecranAccueilNback.classList.add("cache");
   ecranResultatsNback.classList.add("cache");
   ecranJeuNback.classList.remove("cache");
 
+  document.getElementById("consigne-nback").textContent =
+    nSeviye === 1 ? "Bir önceki harfle aynıysa yanıt verin" : "İki önceki harfle aynıysa yanıt verin";
+  lettrAffichee.textContent = "";
+  geriBildirim(feedbackNback, "");
+  compteurNback.textContent = "Hazır olun";
   timerNback = setTimeout(nouvelEssaiNback, 1000);
 }
 
 document.getElementById("bouton-start-nback").addEventListener("click", demarrerNback);
 document.getElementById("bouton-restart-nback").addEventListener("click", demarrerNback);
+document.getElementById("yanit-nback").addEventListener("click", reponseNback);
+
+for (const b of document.querySelectorAll(".seviye .sec")) {
+  b.addEventListener("click", () => {
+    nSeviye = Number(b.dataset.n);
+    for (const x of document.querySelectorAll(".seviye .sec")) {
+      const on = x === b;
+      x.classList.toggle("is-on", on);
+      x.setAttribute("aria-pressed", String(on));
+    }
+    document.getElementById("n-metin").textContent = nSeviye === 1 ? "bir önceki" : "iki önceki";
+  });
+}
 
 // ============================================
-// 🛑 GO / NO-GO
+// GO/NO-GO
 // ============================================
 
-const SYMBOLE_GO    = "⭐"; // Appuyer sur Espace
-const SYMBOLE_NOGO  = "❌"; // Ne rien faire
-const NOMBRE_ESSAIS_GONOGO = 30; // 30 essais : 70% Go, 30% No-Go
-const DUREE_SYMBOLE = 1000; // Temps d'affichage du symbole
-const DUREE_PAUSE_GONOGO = 800; // Pause entre les essais
+const SYMBOLE_GO           = "⭐";
+const SYMBOLE_NOGO         = "❌";
+const NOMBRE_ESSAIS_GONOGO = 40;   // 30 Go + 10 No-Go
+const NOMBRE_NOGO          = 10;
+const DUREE_SYMBOLE        = 800;  // uyaranın ekranda kalma ve yanıt süresi
+const PAUSE_MIN            = 700;  // denemeler arası süre 700-1100 ms arasında değişir
+const PAUSE_MAX            = 1100;
 
+let listeGonogo      = [];
 let essaiGonogo      = 0;
-let bonnesRepGonogo  = 0;  // Go bien appuyés
-let fauxPosiGonogo   = 0;  // No-Go appuyés par erreur (impulsivité)
-let omissionsGonogo  = 0;  // Go manqués (inattention)
-let tempsRepGonogo   = []; // Temps de réaction sur les Go corrects
 let enAttenteGonogo  = false;
 let aReponduGonogo   = false;
+let tempsDebutGonogo = 0;
+let tempsRepActuel   = null;
 let timerGonogo      = null;
-let estGoActuel      = false;
 let resultatsGonogo  = [];
 
 const ecranAccueilGonogo   = document.getElementById("ecran-accueil-gonogo");
@@ -336,163 +355,127 @@ const symboleAffiche       = document.getElementById("symbole-affiche");
 const feedbackGonogo       = document.getElementById("feedback-gonogo");
 const compteurGonogo       = document.getElementById("compteur-gonogo");
 
+// İlk üç deneme Go olur (basma yanıtı yerleşsin), No-Go'lar art arda gelmez
+function listeGonogoKur() {
+  for (let deneme = 0; deneme < 200; deneme++) {
+    const kalan = karistir(
+      Array(NOMBRE_ESSAIS_GONOGO - 3 - NOMBRE_NOGO).fill(true).concat(Array(NOMBRE_NOGO).fill(false))
+    );
+    const liste = [true, true, true].concat(kalan);
+    if (!liste.some((go, i) => i > 0 && !go && !liste[i - 1])) return liste;
+  }
+  return [true, true, true].concat(
+    Array(NOMBRE_ESSAIS_GONOGO - 3).fill(true).map((_, i) => (i % 3 !== 2 || i >= NOMBRE_NOGO * 3))
+  );
+}
+
 function nouvelEssaiGonogo() {
   if (essaiGonogo >= NOMBRE_ESSAIS_GONOGO) {
     afficherResultatsGonogo();
     return;
   }
-
-  // 70% de chance d'avoir un Go, 30% No-Go
-  estGoActuel     = Math.random() < 0.7;
   aReponduGonogo  = false;
-  enAttenteGonogo = true;
-
-  // On affiche le symbole
-  symboleAffiche.textContent  = estGoActuel ? SYMBOLE_GO : SYMBOLE_NOGO;
-  feedbackGonogo.textContent  = "";
-  compteurGonogo.textContent  = `Essai : ${essaiGonogo + 1} / ${NOMBRE_ESSAIS_GONOGO}`;
-
-  // On note l'heure pour mesurer le temps de réaction
-  tempsDebutGonogo = Date.now();
-
-  // Après DUREE_SYMBOLE ms, on évalue
-  timerGonogo = setTimeout(() => {
-    evaluerReponseGonogo();
-  }, DUREE_SYMBOLE);
+  tempsRepActuel  = null;
+  symboleAffiche.textContent = listeGonogo[essaiGonogo] ? SYMBOLE_GO : SYMBOLE_NOGO;
+  geriBildirim(feedbackGonogo, "");
+  compteurGonogo.textContent = `Deneme ${essaiGonogo + 1} / ${NOMBRE_ESSAIS_GONOGO}`;
+  tempsDebutGonogo = performance.now();
+  enAttenteGonogo  = true;
+  timerGonogo = setTimeout(evaluerReponseGonogo, DUREE_SYMBOLE);
 }
 
-// Variable pour le temps de début Go/No-Go
-let tempsDebutGonogo = 0;
+function reponseGonogo() {
+  if (!enAttenteGonogo || aReponduGonogo) return;
+  aReponduGonogo = true;
+  tempsRepActuel = Math.round(performance.now() - tempsDebutGonogo);
+  const estGo = listeGonogo[essaiGonogo];
+  geriBildirim(feedbackGonogo, estGo ? "Doğru" : "Yanlış basma", estGo ? "ok" : "hata");
+  if (estGo) symboleAffiche.textContent = "";
+}
 
 function evaluerReponseGonogo() {
-  enAttenteGonogo        = false;
-  symboleAffiche.textContent = ""; // On cache le symbole
+  enAttenteGonogo = false;
+  const estGo = listeGonogo[essaiGonogo];
+  symboleAffiche.textContent = "";
+  if (estGo && !aReponduGonogo) geriBildirim(feedbackGonogo, "Kaçtı", "uyar");
 
-  if (estGoActuel && aReponduGonogo) {
-    // Go + appuyé = correct !
-    bonnesRepGonogo++;
-    const tr = Date.now() - tempsDebutGonogo;
-    tempsRepGonogo.push(tr);
-    feedbackGonogo.textContent = "✅ Correct !";
-    feedbackGonogo.style.color = "#2ecc71";
-  } else if (estGoActuel && !aReponduGonogo) {
-    // Go + pas appuyé = omission
-    omissionsGonogo++;
-    feedbackGonogo.textContent = "⚠️ Missed !";
-    feedbackGonogo.style.color = "#f39c12";
-  } else if (!estGoActuel && aReponduGonogo) {
-    // No-Go + appuyé = erreur d'impulsivité !
-    fauxPosiGonogo++;
-    feedbackGonogo.textContent = "🛑 Impulsive !";
-    feedbackGonogo.style.color = "#e74c3c";
-  } else {
-    // No-Go + pas appuyé = bonne inhibition (on ne dit rien)
-    feedbackGonogo.textContent = "👍 Good inhibition !";
-    feedbackGonogo.style.color = "#3498db";
-  }
-
-  resultatsGonogo.push({
-    essai: essaiGonogo + 1,
-    type: estGoActuel ? "Go" : "No-Go",
-    aRepondu: aReponduGonogo
-  });
-
+  resultatsGonogo.push({ estGo, aRepondu: aReponduGonogo, tempsReaction: tempsRepActuel });
   essaiGonogo++;
-  timerGonogo = setTimeout(nouvelEssaiGonogo, DUREE_PAUSE_GONOGO);
+  timerGonogo = setTimeout(nouvelEssaiGonogo, PAUSE_MIN + Math.random() * (PAUSE_MAX - PAUSE_MIN));
 }
 
 function afficherResultatsGonogo() {
   ecranJeuGonogo.classList.add("cache");
   ecranResultatsGonogo.classList.remove("cache");
 
-  // Nombre total de Go dans la session
-  const totalGo      = resultatsGonogo.filter(r => r.type === "Go").length;
-  const totalNogo    = resultatsGonogo.filter(r => r.type === "No-Go").length;
+  const go     = resultatsGonogo.filter(r => r.estGo);
+  const nogo   = resultatsGonogo.filter(r => !r.estGo);
+  const dogru  = go.filter(r => r.aRepondu);
+  const yanlis = nogo.filter(r => r.aRepondu).length;
+  const kacan  = go.length - dogru.length;
 
-  // Précision sur les Go
-  const precisionGo  = totalGo > 0
-    ? Math.round((bonnesRepGonogo / totalGo) * 100)
-    : 0;
+  tabloYaz("tablo-gonogo", [
+    ["Yanlış basma (No-Go’da yanıt)", `${yanlis} / ${nogo.length} (%${yuzde(yanlis, nogo.length)})`],
+    ["Kaçırma (Go’da yanıt yok)", `${kacan} / ${go.length} (%${yuzde(kacan, go.length)})`],
+    ["Go: ortalama tepki süresi", ms(ortalama(dogru.map(r => r.tempsReaction)))]
+  ]);
 
-  // Temps de réaction moyen sur les Go corrects
-  const tempsMoyenGo = tempsRepGonogo.length > 0
-    ? Math.round(tempsRepGonogo.reduce((a, b) => a + b, 0) / tempsRepGonogo.length)
-    : 0;
-
-  // Taux d'erreurs d'impulsivité
-  const tauxImpulsi  = totalNogo > 0
-    ? Math.round((fauxPosiGonogo / totalNogo) * 100)
-    : 0;
-
-  let diagnostic  = "";
-  let couleurDiag = "";
-
-  if (tauxImpulsi <= 10 && precisionGo >= 80) {
-    diagnostic  = "🟢 Excellent inhibition ! You control your impulses well.";
-    couleurDiag = "#2ecc71";
-  } else if (tauxImpulsi <= 25) {
-    diagnostic  = "🟡 Correct inhibition. Some impulsive errors, but well controlled.";
-    couleurDiag = "#f39c12";
-  } else {
-    diagnostic  = "🔴 Difficult inhibition. Many impulsive errors — that's what we're measuring !";
-    couleurDiag = "#e74c3c";
-  }
-
-  document.getElementById("score-final-gonogo").textContent = `🎯 Go Precision : ${precisionGo}% | ⏱️ Average time : ${tempsMoyenGo} ms`;
-  document.getElementById("details-gonogo").textContent     = `🛑 Impulses errors : ${fauxPosiGonogo}/${totalNogo} | ⚠️ Omissions : ${omissionsGonogo}/${totalGo}`;
-  document.getElementById("diagnostic-gonogo").textContent  = diagnostic;
-  document.getElementById("diagnostic-gonogo").style.color  = couleurDiag;
+  document.getElementById("diagnostic-gonogo").textContent =
+    "Yanlış basma tepkiyi tutamamayı, kaçırma dikkatin kaymasını gösterir; ikisi ayrı okunur. Hız ile doğruluk arasında bir alışveriş vardır: çok hızlı yanıt veren kişi daha çok yanlış basar. 10 No-Go denemesinde tek bir hata oranı 10 puan oynatır.";
 }
 
 function demarrerGonogo() {
+  clearTimeout(timerGonogo);
+  listeGonogo     = listeGonogoKur();
   essaiGonogo     = 0;
-  bonnesRepGonogo = 0;
-  fauxPosiGonogo  = 0;
-  omissionsGonogo = 0;
-  tempsRepGonogo  = [];
   resultatsGonogo = [];
+  enAttenteGonogo = false;
 
   ecranAccueilGonogo.classList.add("cache");
   ecranResultatsGonogo.classList.add("cache");
   ecranJeuGonogo.classList.remove("cache");
 
+  symboleAffiche.textContent = "";
+  geriBildirim(feedbackGonogo, "");
+  compteurGonogo.textContent = "Hazır olun";
   timerGonogo = setTimeout(nouvelEssaiGonogo, 1000);
 }
 
 document.getElementById("bouton-start-gonogo").addEventListener("click", demarrerGonogo);
 document.getElementById("bouton-restart-gonogo").addEventListener("click", demarrerGonogo);
+document.getElementById("yanit-gonogo").addEventListener("pointerdown", e => { e.preventDefault(); reponseGonogo(); });
+document.getElementById("yanit-gonogo").addEventListener("click", reponseGonogo);
 
 // ============================================
-// ⌨️ GESTION DU CLAVIER (tous les jeux)
+// ORTAK: durdurma, gezinme, klavye
 // ============================================
 
-document.addEventListener("keydown", function(event) {
-  const touche = event.key.toLowerCase();
+function durdurHepsi() {
+  clearTimeout(timerStroop);
+  clearTimeout(timerNback);
+  clearTimeout(timerGonogo);
+  enAttenteStroop = enAttenteNback = enAttenteGonogo = false;
+}
 
-  // Stroop : touches R, B, V
-  if (touche === "r" || touche === "b" || touche === "v") {
-    traiterReponseStroop(touche);
+document.getElementById("btn-stroop").addEventListener("click", () => gorevAc(jeuStroop, ecranAccueilStroop, ecranJeuStroop, ecranResultatsStroop));
+document.getElementById("btn-nback").addEventListener("click",  () => gorevAc(jeuNback, ecranAccueilNback, ecranJeuNback, ecranResultatsNback));
+document.getElementById("btn-gonogo").addEventListener("click", () => gorevAc(jeuGonogo, ecranAccueilGonogo, ecranJeuGonogo, ecranResultatsGonogo));
+
+for (const id of ["retour-stroop", "retour-nback", "retour-gonogo", "retour-resultats-stroop", "retour-resultats-nback", "retour-resultats-gonogo"]) {
+  document.getElementById(id).addEventListener("click", () => afficherEcran(menuPrincipal));
+}
+
+document.addEventListener("keydown", function (event) {
+  if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
+  // Türkçe klavye: İ/ı dönüşümüne takılmamak için fiziksel tuş kodu kullanılır
+  if (enAttenteStroop) {
+    const harita = { KeyK: "k", KeyM: "m", KeyS: "s" };
+    if (harita[event.code]) traiterReponseStroop(harita[event.code]);
+    return;
   }
-
-  // N-Back : touche Espace
-  if (event.code === "Space" && enAttenteNback && !aRepondu) {
+  if (event.code === "Space" && (enAttenteNback || enAttenteGonogo)) {
     event.preventDefault();
-    aRepondu = true;
-    clearTimeout(timerNback);
-    feedbackNback.textContent = "👆 Press !";
-    feedbackNback.style.color = "#3498db";
-    const estCible = (lettreActuelle === lettrePrecedente) && essaiNback > 0;
-    evaluerReponseNback(estCible);
-  }
-
-  // Go/No-Go : touche Espace
-  if (event.code === "Space" && enAttenteGonogo && !aReponduGonogo) {
-    event.preventDefault();
-    aReponduGonogo = true;
-    clearTimeout(timerGonogo);
-
-    // Si c'est un Go et qu'on appuie : on évalue immédiatement
-    // Si c'est un No-Go et qu'on appuie : on évalue immédiatement aussi
-    evaluerReponseGonogo();
+    if (enAttenteNback) reponseNback();
+    else reponseGonogo();
   }
 });

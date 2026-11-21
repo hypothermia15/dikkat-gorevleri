@@ -1,129 +1,206 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="tr">
 <head>
-  <title>Cognitive Arcade</title>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dikkat ve İnhibisyon Görevleri: Stroop, N-geri, Go/No-Go</title>
+  <meta name="description" content="Stroop, N-geri ve Go/No-Go görevlerini tarayıcıda deneyin; her görevin neyi ölçtüğünü, sonucun nasıl okunduğunu ve neden tanı aracı olmadığını kaynaklarıyla görün. Cognitive Arcade çalışmasının Türkçe uyarlaması." />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-  <!-- ========== MENU PRINCIPAL ========== -->
-  <div id="menu-principal">
-    <h1>🧠 Cognitive Arcade</h1>
-    <p class="sous-titre">Test your cognitives functions</p>
+  <!-- ========== ANA MENÜ ========== -->
+  <main id="menu-principal">
+    <h1>Dikkat ve İnhibisyon Görevleri</h1>
+    <p class="sous-titre">Üç klasik görev neyi ölçer, sonucu nasıl okunur? Önce deneyin, sonra sayıların ne anlama geldiğine bakın.</p>
+
+    <div class="uyari" role="note">
+      <strong>Tanı aracı değildir.</strong> Bu sayfadaki görevler bir paradigmayı tanıtmak için kısaltılmıştır. Norm verisi yoktur; sonuçlar DEHB ya da başka bir tanı için kanıt sayılmaz.
+    </div>
 
     <div id="liste-jeux">
-
-      <div class="carte-jeu" id="btn-stroop">
-        <div class="emoji-jeu">🎨</div>
-        <h2>Stroop Test</h2>
-        <p>Selective attention</p>
-      </div>
-
-      <div class="carte-jeu" id="btn-nback">
-        <div class="emoji-jeu">🔢</div>
-        <h2>N-Back</h2>
-        <p>Working memory</p>
-      </div>
-
-      <div class="carte-jeu" id="btn-gonogo">
-        <div class="emoji-jeu">🛑</div>
-        <h2>Go / No-Go</h2>
-        <p>Inhibition</p>
-      </div>
-
+      <button class="carte-jeu" id="btn-stroop" type="button">
+        <span class="emoji-jeu" aria-hidden="true">🎨</span>
+        <span class="carte-ad">Stroop</span>
+        <span class="carte-alt">Girişim denetimi</span>
+      </button>
+      <button class="carte-jeu" id="btn-nback" type="button">
+        <span class="emoji-jeu" aria-hidden="true">🔢</span>
+        <span class="carte-ad">N-geri</span>
+        <span class="carte-alt">Çalışma belleğini güncelleme</span>
+      </button>
+      <button class="carte-jeu" id="btn-gonogo" type="button">
+        <span class="emoji-jeu" aria-hidden="true">🛑</span>
+        <span class="carte-ad">Go/No-Go</span>
+        <span class="carte-alt">Tepki inhibisyonu</span>
+      </button>
     </div>
-  </div>
 
-  <!-- ========== STROOP TEST ========== -->
-  <div id="jeu-stroop" class="cache">
+    <details class="bilgi">
+      <summary>Bu sayılar neden tanı koydurmaz?</summary>
+      <ul>
+        <li><strong>Üç ayrı ama ilişkili işlev.</strong> İnhibisyon, güncelleme ve küme değiştirme birbiriyle orta düzeyde ilişkilidir ama ayrıştırılabilir (Miyake ve ark. 2000). Buradaki görevler ilk ikisine örnektir; hiçbiri tek bir işlevi saf hâliyle ölçmez.</li>
+        <li><strong>Grup farkı, birey ayrımı değildir.</strong> 83 çalışmalık bir meta-analizde DEHB gruplarının yürütücü işlev ölçümlerindeki farkı orta büyüklükteydi (etki büyüklüğü 0,46-0,69); yazarlar bu zayıflıkların DEHB için ne gerekli ne yeterli olduğu sonucuna vardı (Willcutt ve ark. 2005).</li>
+        <li><strong>Tek başına duyarlı ve özgül değil.</strong> 11 psikiyatrik bozuklukta 318 çalışmayı kapsayan meta-analiz, tepkiyi tutma güçlüğünün çoğu bozuklukta tek başına tanı ölçütü ya da biyobelirteç olacak kadar duyarlı ve özgül olmadığını bildirdi (Wright ve ark. 2014).</li>
+        <li><strong>Güvenirlik paradoksu.</strong> Deneysel etkisi çok sağlam olan görevlerde kişiler arası değişkenlik düşüktür; bu yüzden bireysel farkları ölçmede test-tekrar test güvenirlikleri çoğu görevde beklenenden düşük çıkar (yedi klasik görevde 0 ile 0,82 arası; Hedge ve ark. 2018).</li>
+        <li><strong>Bu sayfanın kendi sınırları.</strong> Deneme sayısı azdır, alıştırma turu yoktur, tarayıcı ve ekran gecikmesi tepki süresine eklenir, dokunmatik ekranla klavye aynı sonucu vermez.</li>
+      </ul>
+    </details>
+
+    <details class="bilgi">
+      <summary>Kaynaklar</summary>
+      <ul class="kaynak">
+        <li>Diamond A. Executive functions. Annu Rev Psychol. 2013;64:135-68. <a href="https://doi.org/10.1146/annurev-psych-113011-143750" target="_blank" rel="noopener">doi:10.1146/annurev-psych-113011-143750</a></li>
+        <li>Donders FC. On the speed of mental processes. Acta Psychol (Amst). 1969;30:412-31 (özgün yayın 1868). <a href="https://doi.org/10.1016/0001-6918(69)90065-1" target="_blank" rel="noopener">doi:10.1016/0001-6918(69)90065-1</a></li>
+        <li>Hedge C, Powell G, Sumner P. The reliability paradox: Why robust cognitive tasks do not produce reliable individual differences. Behav Res Methods. 2018;50(3):1166-1186. <a href="https://doi.org/10.3758/s13428-017-0935-1" target="_blank" rel="noopener">doi:10.3758/s13428-017-0935-1</a></li>
+        <li>Kirchner WK. Age differences in short-term retention of rapidly changing information. J Exp Psychol. 1958;55(4):352-8. <a href="https://doi.org/10.1037/h0043688" target="_blank" rel="noopener">doi:10.1037/h0043688</a></li>
+        <li>MacLeod CM. Half a century of research on the Stroop effect: an integrative review. Psychol Bull. 1991;109(2):163-203. <a href="https://doi.org/10.1037/0033-2909.109.2.163" target="_blank" rel="noopener">doi:10.1037/0033-2909.109.2.163</a></li>
+        <li>Miyake A, Friedman NP, Emerson MJ, Witzki AH, Howerter A, Wager TD. The unity and diversity of executive functions and their contributions to complex "Frontal Lobe" tasks: a latent variable analysis. Cogn Psychol. 2000;41(1):49-100. <a href="https://doi.org/10.1006/cogp.1999.0734" target="_blank" rel="noopener">doi:10.1006/cogp.1999.0734</a></li>
+        <li>Owen AM, McMillan KM, Laird AR, Bullmore E. N-back working memory paradigm: a meta-analysis of normative functional neuroimaging studies. Hum Brain Mapp. 2005;25(1):46-59. <a href="https://doi.org/10.1002/hbm.20131" target="_blank" rel="noopener">doi:10.1002/hbm.20131</a></li>
+        <li>Stroop JR. Studies of interference in serial verbal reactions. J Exp Psychol. 1935;18:643-662. (PubMed’de kaydı yok; tam metin: <a href="https://psychclassics.yorku.ca/Stroop/" target="_blank" rel="noopener">Classics in the History of Psychology</a>)</li>
+        <li>Willcutt EG, Doyle AE, Nigg JT, Faraone SV, Pennington BF. Validity of the executive function theory of attention-deficit/hyperactivity disorder: a meta-analytic review. Biol Psychiatry. 2005;57(11):1336-46. <a href="https://doi.org/10.1016/j.biopsych.2005.02.006" target="_blank" rel="noopener">doi:10.1016/j.biopsych.2005.02.006</a></li>
+        <li>Wright L, Lipszyc J, Dupuis A, Thayapararajah SW, Schachar R. Response inhibition and psychopathology: a meta-analysis of go/no-go task performance. J Abnorm Psychol. 2014;123(2):429-39. <a href="https://doi.org/10.1037/a0036295" target="_blank" rel="noopener">doi:10.1037/a0036295</a></li>
+      </ul>
+    </details>
+
+    <p class="kunye">Özgün eser: <a href="https://github.com/Anyma-exe/cognitive-arcade" target="_blank" rel="noopener">Cognitive Arcade</a>, Anyma-exe (2026), MIT lisansı. Türkçe uyarlama, açıklamalar ve kaynaklar: Doç. Dr. Miraç Barış Usta. Hiçbir veri kaydedilmez ya da gönderilmez.</p>
+  </main>
+
+  <!-- ========== STROOP ========== -->
+  <section id="jeu-stroop" class="cache" aria-labelledby="h-stroop">
 
     <div id="ecran-accueil-stroop">
-      <button class="bouton-retour" id="retour-stroop">← Menu</button>
-      <h1>🎨 Stroop Test</h1>
-      <p>You will see colored words appear.</p>
-      <p>Press the <strong>keyboard key</strong> that corresponds to the <strong>ink color</strong> !</p>
-      <p>🔴 R = Red &nbsp; 🔵 B = Blue &nbsp; 🟢 G = Green</p>
-      <button id="bouton-start-stroop">Start</button>
+      <button class="bouton-retour" id="retour-stroop" type="button">← Görevler</button>
+      <h1 id="h-stroop">🎨 Stroop</h1>
+      <p>Ekranda renk adları çıkacak. Sözcüğü okumayın; <strong>yazının rengini</strong> seçin.</p>
+      <p class="tuslar">Klavye: <kbd>K</kbd> kırmızı · <kbd>M</kbd> mavi · <kbd>S</kbd> sarı. Dokunmatik ekranda alttaki düğmeler.</p>
+      <button id="bouton-start-stroop" type="button">Başla (24 deneme)</button>
+      <details class="bilgi">
+        <summary>Görev hakkında</summary>
+        <ul>
+          <li><strong>Ne ölçer:</strong> Girişim denetimi. Okuma otomatikleşmiş bir beceridir; sözcük ile renk çeliştiğinde otomatik yanıtı bastırmak zaman alır (Stroop 1935; MacLeod 1991). Diamond bu süreci inhibisyonun “girişim denetimi” bileşeni içinde sayar (Diamond 2013).</li>
+          <li><strong>Temel ölçü:</strong> Uyumsuz denemelerdeki (KIRMIZI sözcüğü mavi yazılmış) ortalama tepki süresi ile uyumlu denemelerdeki sürenin farkı. Buna Stroop girişim etkisi denir.</li>
+          <li><strong>Sınırı:</strong> Fark puanları bireyler arasında az değişir; bu yüzden etki çok sağlam olduğu hâlde kişiye özgü ölçüm olarak güvenirliği düşüktür (Hedge ve ark. 2018).</li>
+          <li><strong>Bu sürümde:</strong> 12 uyumlu, 12 uyumsuz deneme karışık sırayla gelir. Renk görme farklılığı olanlar için uygun değildir.</li>
+        </ul>
+      </details>
     </div>
 
     <div id="ecran-jeu-stroop" class="cache">
-      <p id="consigne-stroop">Press on R, B or G depending on the color of the ink</p>
-      <div id="mot-affiche">RED</div>
-      <p id="feedback-stroop"></p>
-      <p id="compteur-stroop">Test : 1 / 20</p>
+      <p id="consigne-stroop">Yazının rengini seçin</p>
+      <div id="mot-affiche" aria-live="off">KIRMIZI</div>
+      <div class="dugmeler" id="dugmeler-stroop">
+        <button type="button" class="renk renk-k" data-touche="k">Kırmızı <kbd>K</kbd></button>
+        <button type="button" class="renk renk-m" data-touche="m">Mavi <kbd>M</kbd></button>
+        <button type="button" class="renk renk-s" data-touche="s">Sarı <kbd>S</kbd></button>
+      </div>
+      <p id="feedback-stroop" class="geri" aria-live="polite"></p>
+      <p id="compteur-stroop" class="sayac"></p>
     </div>
 
     <div id="ecran-resultats-stroop" class="cache">
-      <h2>✅ Finished !</h2>
-      <p id="score-final-stroop"></p>
-      <p id="temps-moyen-stroop"></p>
-      <p id="diagnostic-stroop"></p>
-      <button id="bouton-restart-stroop">Start over</button>
-      <button class="bouton-retour" id="retour-resultats-stroop">← Menu</button>
+      <h2>Stroop: sonuç</h2>
+      <table class="sonuc">
+        <tbody id="tablo-stroop"></tbody>
+      </table>
+      <p id="diagnostic-stroop" class="yorum"></p>
+      <p class="uyari kucuk">Tek oturumluk, normu olmayan bir gösterimdir. Bu sayılarla kişi hakkında klinik çıkarım yapılamaz.</p>
+      <button id="bouton-restart-stroop" type="button">Yeniden</button>
+      <button class="bouton-retour" id="retour-resultats-stroop" type="button">← Görevler</button>
     </div>
 
-  </div>
+  </section>
 
-  <!-- ========== N-BACK ========== -->
-  <div id="jeu-nback" class="cache">
+  <!-- ========== N-GERİ ========== -->
+  <section id="jeu-nback" class="cache" aria-labelledby="h-nback">
 
     <div id="ecran-accueil-nback">
-      <button class="bouton-retour" id="retour-nback">← Menu</button>
-      <h1>🔢 N-Back</h1>
-      <p>Letters will appear one by one.</p>
-      <p>Press on <strong>Space key</strong> if the letter is <strong>identical to the previous one</strong>.</p>
-      <p>Otherwise, don't do anything !</p>
-      <button id="bouton-start-nback">Start</button>
+      <button class="bouton-retour" id="retour-nback" type="button">← Görevler</button>
+      <h1 id="h-nback">🔢 N-geri</h1>
+      <p>Harfler tek tek çıkacak. Ekrandaki harf, <strong id="n-metin">bir önceki</strong> harfle aynıysa yanıt verin; değilse hiçbir şey yapmayın.</p>
+      <p class="tuslar">Klavye: <kbd>Boşluk</kbd>. Dokunmatik ekranda “Aynı” düğmesi.</p>
+      <div class="seviye" role="group" aria-label="Zorluk">
+        <button type="button" class="sec is-on" data-n="1" aria-pressed="true">1-geri</button>
+        <button type="button" class="sec" data-n="2" aria-pressed="false">2-geri</button>
+      </div>
+      <button id="bouton-start-nback" type="button">Başla (25 harf)</button>
+      <details class="bilgi">
+        <summary>Görev hakkında</summary>
+        <ul>
+          <li><strong>Ne ölçer:</strong> Çalışma belleğinde tutulan bilgiyi sürekli güncelleme. Görevi Kirchner tanımladı (Kirchner 1958). İşlevsel görüntüleme çalışmalarında en sık kullanılan çalışma belleği paradigmalarından biridir ve frontoparietal bir ağı tutarlı biçimde etkinleştirir (Owen ve ark. 2005).</li>
+          <li><strong>Temel ölçüler:</strong> Yakalanan hedef sayısı (isabet), hedef olmayan harfe verilen yanıt (yanlış alarm) ve kaçırılan hedef. Yalnızca isabet oranına bakmak yanıltır: her harfe basan kişi bütün hedefleri yakalar.</li>
+          <li><strong>N arttıkça:</strong> 1-geri daha çok sürdürülen dikkati yoklar; 2-geri ve üstünde güncelleme yükü belirginleşir.</li>
+          <li><strong>Bu sürümde:</strong> Özgün eserde hedef harf parlayarak belli ediliyordu; görev anlamını yitirmesin diye bu ipucu kaldırıldı ve 2-geri seçeneği eklendi.</li>
+        </ul>
+      </details>
     </div>
 
     <div id="ecran-jeu-nback" class="cache">
-      <p id="consigne-nback">Space key = same letter as the previous</p>
-      <div id="lettre-affichee">A</div>
-      <p id="feedback-nback"></p>
-      <p id="compteur-nback">Test : 1 / 20</p>
+      <p id="consigne-nback"></p>
+      <div id="lettre-affichee"></div>
+      <div class="dugmeler">
+        <button type="button" class="yanit" id="yanit-nback">Aynı <kbd>Boşluk</kbd></button>
+      </div>
+      <p id="feedback-nback" class="geri" aria-live="polite"></p>
+      <p id="compteur-nback" class="sayac"></p>
     </div>
 
     <div id="ecran-resultats-nback" class="cache">
-      <h2>✅ Finished !</h2>
-      <p id="score-final-nback"></p>
-      <p id="details-nback"></p>
-      <p id="diagnostic-nback"></p>
-      <button id="bouton-restart-nback">Start over</button>
-      <button class="bouton-retour" id="retour-resultats-nback">← Menu</button>
+      <h2>N-geri: sonuç</h2>
+      <table class="sonuc">
+        <tbody id="tablo-nback"></tbody>
+      </table>
+      <p id="diagnostic-nback" class="yorum"></p>
+      <p class="uyari kucuk">Tek oturumluk, normu olmayan bir gösterimdir. Bu sayılarla kişi hakkında klinik çıkarım yapılamaz.</p>
+      <button id="bouton-restart-nback" type="button">Yeniden</button>
+      <button class="bouton-retour" id="retour-resultats-nback" type="button">← Görevler</button>
     </div>
 
-  </div>
+  </section>
 
   <!-- ========== GO/NO-GO ========== -->
-  <div id="jeu-gonogo" class="cache">
+  <section id="jeu-gonogo" class="cache" aria-labelledby="h-gonogo">
 
     <div id="ecran-accueil-gonogo">
-      <button class="bouton-retour" id="retour-gonogo">← Menu</button>
-      <h1>🛑 Go / No-Go</h1>
-      <p>Symbols will appear one by one.</p>
-      <p>Press on <strong>Spare key</strong> when you see ⭐</p>
-      <p>Do <strong>nothing</strong> when you see ❌</p>
-      <button id="bouton-start-gonogo">Start</button>
+      <button class="bouton-retour" id="retour-gonogo" type="button">← Görevler</button>
+      <h1 id="h-gonogo">🛑 Go/No-Go</h1>
+      <p><span aria-hidden="true">⭐</span> görünce olabildiğince hızlı yanıt verin. <span aria-hidden="true">❌</span> görünce <strong>hiçbir şey yapmayın</strong>.</p>
+      <p class="tuslar">Klavye: <kbd>Boşluk</kbd>. Dokunmatik ekranda “Bas” düğmesi.</p>
+      <button id="bouton-start-gonogo" type="button">Başla (40 deneme)</button>
+      <details class="bilgi">
+        <summary>Görev hakkında</summary>
+        <ul>
+          <li><strong>Ne ölçer:</strong> Baskın hâle gelmiş bir motor yanıtı durdurabilme (tepki inhibisyonu). Kökeni, Donders’in bir uyarana yanıt verip ötekilere vermemeyi istediği tepki süresi deneylerine uzanır (Donders 1868/1969).</li>
+          <li><strong>Temel ölçüler:</strong> No-Go uyaranına basmak (yanlış basma, “commission”) tepkiyi tutamamanın göstergesidir. Go uyaranını kaçırmak (“omission”) sürdürülen dikkatin göstergesi sayılır (Wright ve ark. 2014).</li>
+          <li><strong>Neden Go çoğunlukta:</strong> Basma yanıtı sık yinelendiğinde baskın hâle gelir; durdurmak ancak o zaman zorlaşır.</li>
+          <li><strong>Sınırı:</strong> Psikiyatrik bozukluklarda yanlış basma farkı küçük ile orta arasındadır ve çoğu bozuklukta tek başına tanı ölçütü olacak kadar duyarlı ve özgül değildir (Wright ve ark. 2014).</li>
+          <li><strong>Bu sürümde:</strong> 40 denemenin 30’u Go, 10’u No-Go; uyaran 800 ms kalır, denemeler arası süre değişkendir.</li>
+        </ul>
+      </details>
     </div>
 
     <div id="ecran-jeu-gonogo" class="cache">
-      <p id="consigne-gonogo">⭐ = Space key &nbsp;|&nbsp; ❌ = Do nothing</p>
+      <p id="consigne-gonogo">⭐ = bas &nbsp;|&nbsp; ❌ = bekle</p>
       <div id="symbole-affiche"></div>
-      <p id="feedback-gonogo"></p>
-      <p id="compteur-gonogo">Test : 1 / 30</p>
+      <div class="dugmeler">
+        <button type="button" class="yanit" id="yanit-gonogo">Bas <kbd>Boşluk</kbd></button>
+      </div>
+      <p id="feedback-gonogo" class="geri" aria-live="polite"></p>
+      <p id="compteur-gonogo" class="sayac"></p>
     </div>
 
     <div id="ecran-resultats-gonogo" class="cache">
-      <h2>✅ Finished !</h2>
-      <p id="score-final-gonogo"></p>
-      <p id="details-gonogo"></p>
-      <p id="diagnostic-gonogo"></p>
-      <button id="bouton-restart-gonogo">Start over</button>
-      <button class="bouton-retour" id="retour-resultats-gonogo">← Menu</button>
+      <h2>Go/No-Go: sonuç</h2>
+      <table class="sonuc">
+        <tbody id="tablo-gonogo"></tbody>
+      </table>
+      <p id="diagnostic-gonogo" class="yorum"></p>
+      <p class="uyari kucuk">Tek oturumluk, normu olmayan bir gösterimdir. Bu sayılarla kişi hakkında klinik çıkarım yapılamaz.</p>
+      <button id="bouton-restart-gonogo" type="button">Yeniden</button>
+      <button class="bouton-retour" id="retour-resultats-gonogo" type="button">← Görevler</button>
     </div>
 
-  </div>
+  </section>
 
   <script src="script.js"></script>
 </body>

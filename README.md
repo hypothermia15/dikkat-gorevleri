@@ -1,3 +1,9 @@
+# Dikkat ve İnhibisyon Görevleri (Türkçe uyarlama)
+
+> Bu depo, Anyma-exe'nin [Cognitive Arcade](https://github.com/Anyma-exe/cognitive-arcade) çalışmasının Türkçe uyarlamasıdır (MIT). Görevlerin işleyişi de değişti; farklar [UYARLAMA.md](UYARLAMA.md) dosyasındadır. Aşağıdaki metin özgün README'dir ve özgün sürümü anlatır.
+
+---
+
 # cognitive-arcade
 
 > A browser-based battery of classic cognitive paradigms — playable, open-source, and grounded in experimental psychology.
