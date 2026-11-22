@@ -163,9 +163,9 @@ function afficherResultatsStroop() {
   if (fark === null) {
     yorum = "Doğru yanıt sayısı fark hesaplamaya yetmedi. Tepki süreleri yalnızca doğru denemelerden hesaplanır.";
   } else if (fark > 0) {
-    yorum = "Uyumsuz denemelerde yavaşladınız: bu, Stroop girişim etkisidir ve hemen herkeste görülür. Farkın büyüklüğü 12 denemelik bir ortalamaya dayanır; birkaç yavaş deneme sonucu belirgin biçimde değiştirir.";
+    yorum = "Uyumsuz denemelerde yavaşladınız: bu, Stroop girişim etkisidir ve hemen herkeste görülür. Farkın büyüklüğü 12 denemelik bir ortalamaya dayanır. Birkaç yavaş deneme sonucu belirgin biçimde değiştirir.";
   } else {
-    yorum = "Bu oturumda uyumsuz denemelerde yavaşlama görülmedi. 12 denemelik ortalamalar oynaktır; etki grup düzeyinde çok sağlamdır ama tek oturumda her zaman ortaya çıkmaz.";
+    yorum = "Bu oturumda uyumsuz denemelerde yavaşlama görülmedi. 12 denemelik ortalamalar oynaktır. Etki grup düzeyinde çok sağlamdır ama tek oturumda her zaman ortaya çıkmaz.";
   }
   document.getElementById("diagnostic-stroop").textContent = yorum;
 }
@@ -287,8 +287,8 @@ function afficherResultatsNback() {
   ]);
 
   let yorum = "İsabet ve yanlış alarm birlikte okunur: çok isabet, çok da yanlış alarm varsa kişi ayırt etmiyor, sık basıyordur.";
-  if (nSeviye === 1) yorum += " 1-geri çoğu erişkin için kolaydır; güncelleme yükünü görmek için 2-geri düzeyini deneyin.";
-  else yorum += " 2-geri düzeyinde her yeni harfte akılda tutulan ikiliyi yenilemek gerekir; hataların artması beklenen bir bulgudur.";
+  if (nSeviye === 1) yorum += " 1-geri çoğu erişkin için kolaydır. Güncelleme yükünü görmek için 2-geri düzeyini deneyin.";
+  else yorum += " 2-geri düzeyinde her yeni harfte akılda tutulan ikiliyi yenilemek gerekir. Hataların artması beklenen bir bulgudur.";
   document.getElementById("diagnostic-nback").textContent = yorum;
 }
 
@@ -421,7 +421,7 @@ function afficherResultatsGonogo() {
   ]);
 
   document.getElementById("diagnostic-gonogo").textContent =
-    "Yanlış basma tepkiyi tutamamayı, kaçırma dikkatin kaymasını gösterir; ikisi ayrı okunur. Hız ile doğruluk arasında bir alışveriş vardır: çok hızlı yanıt veren kişi daha çok yanlış basar. 10 No-Go denemesinde tek bir hata oranı 10 puan oynatır.";
+    "Yanlış basma tepkiyi tutamamayı, kaçırma dikkatin kaymasını gösterir. Ikisi ayrı okunur. Hız ile doğruluk arasında bir alışveriş vardır: çok hızlı yanıt veren kişi daha çok yanlış basar. 10 No-Go denemesinde tek bir hata oranı 10 puan oynatır.";
 }
 
 function demarrerGonogo() {
