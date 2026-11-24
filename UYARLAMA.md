@@ -28,7 +28,9 @@ Uyarlama çeviriden ibaret değildir; görevlerin işleyişi de değişti.
 
 ## Kaynaklar
 
-Sayfadaki on kaynaktan dokuzunun künyesi ve başlığı Kasım 2026'da PubMed kayıtlarıyla doğrulandı. Stroop (1935) PubMed'de dizinlenmediği için DOI verilmedi; künyesi yaygın atıf biçimiyle yazıldı ve tam metnin açık erişimli kopyasına bağlantı kondu.
+24 Kasım 2026'da on birinci kaynak eklendi: Buitelaar ve Newcorn 2026 (doi:10.1056/NEJMcp2516040, künye PubMed kaydıyla doğrulandı). Dört alanlı sınıflama makaledeki şekilden alındı; şekil uyarlayanın paylaştığı ekran görüntüsünden okundu, tam metin okunmadı.
+
+Sayfadaki ilk on kaynaktan dokuzunun künyesi ve başlığı Kasım 2026'da PubMed kayıtlarıyla doğrulandı. Stroop (1935) PubMed'de dizinlenmediği için DOI verilmedi; künyesi yaygın atıf biçimiyle yazıldı ve tam metnin açık erişimli kopyasına bağlantı kondu.
 
 Sayfadaki sayısal aktarımlar (Willcutt 2005: etki büyüklüğü 0,46-0,69, 83 çalışma; Wright 2014: 318 çalışma, 11 bozukluk; Hedge 2018: güvenirlik 0-0,82) ilgili makalelerin PubMed özetlerinden alındı.
 
