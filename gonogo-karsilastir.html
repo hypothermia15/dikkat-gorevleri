@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aynı doğruluk, farklı hatalar · Go/No-Go</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    main { width: min(100%, 720px); padding: 24px 16px 48px; }
+    .kayitlar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .kayitlar p { background: var(--kart); border: 1px solid var(--cizgi); padding: 14px 6px; border-radius: 10px; }
+    .kayitlar output { display: block; font-size: 1.25rem; font-weight: 700; }
+    .deneme-listesi { max-height: 22rem; overflow: auto; }
+    .deneme-listesi thead { position: sticky; top: 0; background: var(--kart); }
+    .hata { color: #ffca83; font-weight: 700; }
+    fieldset { margin: 22px 0; text-align: left; border: 1px solid var(--cizgi); border-radius: 10px; }
+    fieldset label { display: block; padding: 8px; cursor: pointer; }
+    #geri { text-align: left; }
+  </style>
+</head>
+<body><main>
+  <a href="index.html">Görevlere dön</a>
+  <h1>Aynı doğruluk, farklı hatalar</h1>
+  <p>İki çocuk aynı 40 uyaranı aynı sırayla gördü. Yıldızda basmaları, çarpıda beklemeleri istendi. Aşağıdaki kayıtlar eğitim için kurgulandı.</p>
+  <div class="kayitlar"><p>Kayıt A<output id="puan-a"></output></p><p>Kayıt B<output id="puan-b"></output></p></div>
+  <details class="bilgi"><summary>40 denemeyi yan yana incele</summary>
+    <label><input type="checkbox" id="filtre"> Yalnızca en az bir hata içeren denemeleri göster</label>
+    <div class="deneme-listesi" tabindex="0" aria-label="Deneme dizisi">
+      <table class="sonuc"><thead><tr><th scope="col">Deneme</th><th scope="col">Uyaran</th><th scope="col">Kayıt A</th><th scope="col">Kayıt B</th></tr></thead><tbody id="denemeler"></tbody></table>
+    </div>
+  </details>
+  <form id="secim"><fieldset><legend>Hangi yorum deneme kayıtlarıyla uyumlu?</legend>
+    <label><input type="radio" name="yorum" value="ayni" required> İki kayıtta da hatalar aynı tür uyaranlarda oldu.</label>
+    <label><input type="radio" name="yorum" value="ab"> A daha çok Go uyaranını kaçırdı. B daha çok No-Go uyaranında bastı.</label>
+    <label><input type="radio" name="yorum" value="ba"> A daha çok No-Go uyaranında bastı. B daha çok Go uyaranını kaçırdı.</label>
+    <button type="submit">Yorumumu kontrol et</button>
+  </fieldset></form>
+  <div id="geri" role="status"></div>
+  <section id="ozet" hidden><h2>Hataları kendi paydasıyla okuyun</h2>
+    <table class="sonuc"><thead><tr><th scope="col">Ölçü</th><th scope="col">Kayıt A</th><th scope="col">Kayıt B</th></tr></thead><tbody id="olculer"></tbody></table>
+    <p>Kaçırma (omission) için payda Go denemeleri, yanlış basma (commission) için payda No-Go denemeleridir. Bu kayıtlar çocuğun hangi uyaranda nasıl yanıt verdiğini gösterir. Hatanın nedenini belirlemek için ek bilgi gerekir.</p>
+  </section>
+  <noscript>Alıştırmayı kullanmak için JavaScript açık olmalı.</noscript>
+</main>
+<script>
+const noGo = new Set([4, 8, 11, 16, 19, 23, 28, 32, 36, 39]);
+const kacanGo = new Set([7, 14, 26, 34]);
+const yanlisBasma = new Set([8, 19, 28, 36]);
+const denemeler = Array.from({length: 40}, (_, i) => {
+  const no = i + 1, go = !noGo.has(no);
+  return {no, go, a: go && !kacanGo.has(no), b: go || yanlisBasma.has(no)};
+});
+const el = id => document.getElementById(id);
+const yuzde = (sayi, toplam) => '%' + (100 * sayi / toplam).toLocaleString('tr', {maximumFractionDigits: 1});
+function tabloSatiri(tablo, baslik, degerler) {
+  const satir = tablo.insertRow();
+  const th = document.createElement('th');
+  th.scope = 'row'; th.textContent = baslik; satir.append(th);
+  for (const deger of degerler) satir.insertCell().textContent = deger;
+  return satir;
+}
+function diziGoster() {
+  el('denemeler').replaceChildren();
+  for (const d of denemeler) {
+    if (el('filtre').checked && d.go === d.a && d.go === d.b) continue;
+    const satir = tabloSatiri(el('denemeler'), d.no, [d.go ? '⭐ Go' : '❌ No-Go', ...[d.a, d.b].map(basti => basti ? 'Bastı' : 'Basmadı')]);
+    [d.a, d.b].forEach((yanit, i) => {
+      if (yanit !== d.go) { const hucre = satir.cells[i + 2]; hucre.className = 'hata'; hucre.append(' (hata)'); }
+    });
+  }
+}
+const goSayisi = denemeler.filter(d => d.go).length;
+const noGoSayisi = denemeler.length - goSayisi;
+const kayitlar = ['a', 'b'].map(k => {
+  const kacan = denemeler.filter(d => d.go && !d[k]).length;
+  const yanlis = denemeler.filter(d => !d.go && d[k]).length;
+  const dogru = denemeler.length - kacan - yanlis;
+  el('puan-' + k).textContent = dogru + '/' + denemeler.length + ' · ' + yuzde(dogru, denemeler.length);
+  return {kacan, yanlis};
+});
+for (const [baslik, alan, payda] of [['Go: kaçırma', 'kacan', goSayisi], ['No-Go: yanlış basma', 'yanlis', noGoSayisi]]) {
+  tabloSatiri(el('olculer'), baslik, kayitlar.map(k => k[alan] + '/' + payda + ' (' + yuzde(k[alan], payda) + ')'));
+}
+diziGoster();
+el('filtre').addEventListener('change', diziGoster);
+el('secim').addEventListener('submit', event => {
+  event.preventDefault();
+  const secim = new FormData(event.currentTarget).get('yorum');
+  const yorumlar = {
+    ayni: 'Toplam doğru sayıları eşit. Hataların hangi uyaranlarda oluştuğunu görmek için 7. ve 8. denemeleri karşılaştırın.',
+    ba: 'Kayıtları ters yorumladınız. 7. denemede yıldız geldiğinde A basmadı. 8. denemede çarpı geldiğinde B bastı.',
+    ab: 'Doğru. A tüm çarpılarda bekledi, ancak dört yıldızı kaçırdı. B her yıldızda bastı, ancak dört çarpıda da yanıt verdi.'
+  };
+  el('geri').textContent = yorumlar[secim];
+  el('ozet').hidden = false;
+});
+</script></body></html>
