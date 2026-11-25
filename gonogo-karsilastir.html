@@ -15,6 +15,7 @@
     .hata { color: #ffca83; font-weight: 700; }
     fieldset { margin: 22px 0; text-align: left; border: 1px solid var(--cizgi); border-radius: 10px; }
     fieldset label { display: block; padding: 8px; cursor: pointer; }
+    #tek-deneme select { min-height: 44px; max-width: 100%; font: inherit; }
     #geri { text-align: left; }
   </style>
 </head>
@@ -39,6 +40,15 @@
   <section id="ozet" hidden><h2>Hataları kendi paydasıyla okuyun</h2>
     <table class="sonuc"><thead><tr><th scope="col">Ölçü</th><th scope="col">Kayıt A</th><th scope="col">Kayıt B</th></tr></thead><tbody id="olculer"></tbody></table>
     <p>Kaçırma (omission) için payda Go denemeleri, yanlış basma (commission) için payda No-Go denemeleridir. Bu kayıtlar çocuğun hangi uyaranda nasıl yanıt verdiğini gösterir. Hatanın nedenini belirlemek için ek bilgi gerekir.</p>
+    <fieldset id="tek-deneme"><legend>Tek bir yanıt değişseydi?</legend>
+      <p>Bir kayıt ve deneme seçin. Yanıtı değiştirerek üç ölçünün nasıl etkilendiğini inceleyin.</p>
+      <label>Kayıt <select id="kayit"><option value="a">Kayıt A</option><option value="b">Kayıt B</option></select></label>
+      <label>Deneme <select id="deneme-no"></select></label>
+      <p id="ilk-yanit"></p>
+      <label><input id="ters-yanit" type="checkbox"> Bu denemedeki yanıtı tersine çevir</label>
+      <table class="sonuc"><thead><tr><th scope="col">Ölçü</th><th scope="col">Özgün</th><th scope="col">Denediğiniz</th></tr></thead><tbody id="yeni-olculer"></tbody></table>
+      <p id="etki" role="status"></p>
+    </fieldset>
   </section>
   <noscript>Alıştırmayı kullanmak için JavaScript açık olmalı.</noscript>
 </main>
@@ -71,16 +81,49 @@ function diziGoster() {
 }
 const goSayisi = denemeler.filter(d => d.go).length;
 const noGoSayisi = denemeler.length - goSayisi;
-const kayitlar = ['a', 'b'].map(k => {
-  const kacan = denemeler.filter(d => d.go && !d[k]).length;
-  const yanlis = denemeler.filter(d => !d.go && d[k]).length;
-  const dogru = denemeler.length - kacan - yanlis;
-  el('puan-' + k).textContent = dogru + '/' + denemeler.length + ' · ' + yuzde(dogru, denemeler.length);
-  return {kacan, yanlis};
-});
-for (const [baslik, alan, payda] of [['Go: kaçırma', 'kacan', goSayisi], ['No-Go: yanlış basma', 'yanlis', noGoSayisi]]) {
-  tabloSatiri(el('olculer'), baslik, kayitlar.map(k => k[alan] + '/' + payda + ' (' + yuzde(k[alan], payda) + ')'));
+function olc(kayit, dizi) {
+  const kacan = dizi.filter(d => d.go && !d[kayit]).length;
+  const yanlis = dizi.filter(d => !d.go && d[kayit]).length;
+  return {kacan, yanlis, dogru: dizi.length - kacan - yanlis};
 }
+const hataOlculeri = [['Go: kaçırma', 'kacan', goSayisi], ['No-Go: yanlış basma', 'yanlis', noGoSayisi]];
+const oran = (sayi, payda) => sayi + '/' + payda + ' (' + yuzde(sayi, payda) + ')';
+const kayitlar = ['a', 'b'].map(k => {
+  const sonuc = olc(k, denemeler);
+  el('puan-' + k).textContent = sonuc.dogru + '/' + denemeler.length + ' · ' + yuzde(sonuc.dogru, denemeler.length);
+  return sonuc;
+});
+for (const [baslik, alan, payda] of hataOlculeri) {
+  tabloSatiri(el('olculer'), baslik, kayitlar.map(k => oran(k[alan], payda)));
+}
+
+for (const d of denemeler) {
+  el('deneme-no').add(new Option(d.no + ' · ' + (d.go ? '⭐ Go' : '❌ No-Go'), d.no));
+}
+el('deneme-no').value = '7';
+
+function tekDenemeGoster() {
+  const k = el('kayit').value;
+  const d = denemeler[Number(el('deneme-no').value) - 1];
+  const ters = el('ters-yanit').checked;
+  const once = olc(k, denemeler);
+  const sonra = ters ? olc(k, denemeler.map(satir => satir === d ? {...d, [k]: !d[k]} : satir)) : once;
+  const yanit = basti => basti ? 'Bastı' : 'Basmadı';
+  el('ilk-yanit').textContent = 'Özgün yanıt: ' + yanit(d[k]) + '. Beklenen: ' + yanit(d.go) + '.';
+  el('yeni-olculer').replaceChildren();
+  for (const [baslik, alan, payda] of [['Toplam doğruluk', 'dogru', denemeler.length], ...hataOlculeri]) {
+    tabloSatiri(el('yeni-olculer'), baslik, [oran(once[alan], payda), oran(sonra[alan], payda)]);
+  }
+  const hata = d.go ? 'Kaçırma' : 'Yanlış basma';
+  const fark = (100 / (d.go ? goSayisi : noGoSayisi)).toLocaleString('tr', {maximumFractionDigits: 1});
+  const yon = d[k] === d.go ? 'arttı' : 'azaldı';
+  el('etki').textContent = ters ? 'Yeni yanıt: ' + yanit(!d[k]) + '. ' + hata + ' oranı ' + fark + ' yüzde puan ' + yon + '.' : '';
+}
+for (const id of ['kayit', 'deneme-no']) {
+  el(id).addEventListener('change', () => { el('ters-yanit').checked = false; tekDenemeGoster(); });
+}
+el('ters-yanit').addEventListener('change', tekDenemeGoster);
+tekDenemeGoster();
 diziGoster();
 el('filtre').addEventListener('change', diziGoster);
 el('secim').addEventListener('submit', event => {
