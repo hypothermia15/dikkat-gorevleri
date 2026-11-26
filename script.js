@@ -147,27 +147,28 @@ function afficherResultatsStroop() {
 
   const uyumlu  = resultatsStroop.filter(r => r.type === "uyumlu");
   const uyumsuz = resultatsStroop.filter(r => r.type === "uyumsuz");
-  const trU  = ortalama(uyumlu.filter(r => r.correct).map(r => r.tempsReaction));
-  const trUs = ortalama(uyumsuz.filter(r => r.correct).map(r => r.tempsReaction));
+  const dogruUyumlu = uyumlu.filter(r => r.correct);
+  const dogruUyumsuz = uyumsuz.filter(r => r.correct);
+  const trU = ortalama(dogruUyumlu.map(r => r.tempsReaction));
+  const trUs = ortalama(dogruUyumsuz.map(r => r.tempsReaction));
   const fark = (trU !== null && trUs !== null) ? trUs - trU : null;
 
   tabloYaz("tablo-stroop", [
-    ["Uyumlu denemeler: doğru",  `${uyumlu.filter(r => r.correct).length} / ${uyumlu.length}`],
-    ["Uyumsuz denemeler: doğru", `${uyumsuz.filter(r => r.correct).length} / ${uyumsuz.length}`],
+    ["Uyumlu denemeler: doğru",  `${dogruUyumlu.length} / ${uyumlu.length}`],
+    ["Uyumsuz denemeler: doğru", `${dogruUyumsuz.length} / ${uyumsuz.length}`],
     ["Uyumlu: ortalama tepki süresi",  ms(trU)],
     ["Uyumsuz: ortalama tepki süresi", ms(trUs)],
     ["Girişim etkisi (uyumsuz − uyumlu)", fark === null ? "hesaplanamadı" : (fark > 0 ? "+" : "") + fark + " ms"]
   ]);
 
-  let yorum;
-  if (fark === null) {
-    yorum = "Doğru yanıt sayısı fark hesaplamaya yetmedi. Tepki süreleri yalnızca doğru denemelerden hesaplanır.";
-  } else if (fark > 0) {
-    yorum = "Uyumsuz denemelerde yavaşladınız: bu, Stroop girişim etkisidir ve hemen herkeste görülür. Farkın büyüklüğü 12 denemelik bir ortalamaya dayanır. Birkaç yavaş deneme sonucu belirgin biçimde değiştirir.";
-  } else {
-    yorum = "Bu oturumda uyumsuz denemelerde yavaşlama görülmedi. 12 denemelik ortalamalar oynaktır. Etki grup düzeyinde çok sağlamdır ama tek oturumda her zaman ortaya çıkmaz.";
+  let yorum = "Her iki koşulda da en az bir doğru yanıt gerektiği için süre farkı hesaplanamadı.";
+  if (fark !== null) {
+    yorum = fark === 0
+      ? "Bu oturumda iki koşulun milisaniyeye yuvarlanmış ortalamaları eşitti."
+      : `Bu oturumda uyumsuz denemelerde ortalama tepki süreniz ${Math.abs(fark)} ms daha ${fark > 0 ? "uzundu" : "kısaydı"}.`;
   }
-  document.getElementById("diagnostic-stroop").textContent = yorum;
+  const dayanak = `Tepki süresi hesabına uyumlu denemelerde ${dogruUyumlu.length}, uyumsuz denemelerde ${dogruUyumsuz.length} doğru yanıt girdi.`;
+  document.getElementById("diagnostic-stroop").textContent = yorum + " " + dayanak;
 }
 
 function demarrerStroop() {
