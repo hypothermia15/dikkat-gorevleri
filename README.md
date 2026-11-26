@@ -1,6 +1,18 @@
-# Dikkat ve İnhibisyon Görevleri (Türkçe uyarlama)
+# Dikkat ve İnhibisyon Görevleri
 
-> Bu depo, Anyma-exe'nin [Cognitive Arcade](https://github.com/Anyma-exe/cognitive-arcade) çalışmasının Türkçe uyarlamasıdır (MIT). Görevlerin işleyişi de değişti; farklar [UYARLAMA.md](UYARLAMA.md) dosyasındadır. Aşağıdaki metin özgün README'dir ve özgün sürümü anlatır.
+**[Türkçe görevleri tarayıcıda aç](https://hypothermia15.github.io/dikkat-gorevleri/)**
+
+Çocuk ve ergen psikiyatrisi asistanları, tıp ve psikoloji öğrencileri üç görevi klavyeyle veya dokunmatik ekrandaki düğmelerle deneyebilir.
+
+| Görev | Ne yapacaksınız? | Uzunluk |
+| --- | --- | --- |
+| Stroop | Sözcüğün yazıldığı rengi seçin. K kırmızı, M mavi, S sarı. | 24 deneme |
+| N-geri (N-back) | 1-geri veya 2-geri seçin. Harf seçtiğiniz uzaklıktaki harfle aynıysa boşluk tuşuna ya da “Aynı” düğmesine basın. | 25 harf |
+| Go/No-Go | Yıldızda boşluk tuşuna ya da “Bas” düğmesine basın. Çarpıda yanıt vermeden bekleyin. | 40 deneme |
+
+Görevler eğitim amaçlıdır. Sonuçları yorumlarken uygulama içindeki “Bu sayılar neden tanı koydurmaz?” bölümüne bakın.
+
+Bu depo Anyma-exe’nin [Cognitive Arcade](https://github.com/Anyma-exe/cognitive-arcade) çalışmasının Türkçe uyarlamasıdır. [Uyarlama notları](UYARLAMA.md) görev tasarımındaki değişiklikleri açıklar. Özgün projenin İngilizce tanıtımı aşağıdadır.
 
 ---
 
