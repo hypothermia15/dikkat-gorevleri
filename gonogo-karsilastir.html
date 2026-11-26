@@ -15,7 +15,7 @@
     .hata { color: #ffca83; font-weight: 700; }
     fieldset { margin: 22px 0; text-align: left; border: 1px solid var(--cizgi); border-radius: 10px; }
     fieldset label { display: block; padding: 8px; cursor: pointer; }
-    #tek-deneme select { min-height: 44px; max-width: 100%; font: inherit; }
+    fieldset select { min-height: 44px; max-width: 100%; font: inherit; }
     #geri { text-align: left; }
   </style>
 </head>
@@ -48,6 +48,17 @@
       <label><input id="ters-yanit" type="checkbox"> Bu denemedeki yanıtı tersine çevir</label>
       <table class="sonuc"><thead><tr><th scope="col">Ölçü</th><th scope="col">Özgün</th><th scope="col">Denediğiniz</th></tr></thead><tbody id="yeni-olculer"></tbody></table>
       <p id="etki" role="status"></p>
+    </fieldset>
+    <fieldset><legend>Her uyaranda bassaydınız?</legend>
+      <p>40 denemenin hepsinde düğmeye basacağınızı düşünün. Yıldız sayısı değişince toplam doğruluğunuz ve çarpılardaki hata oranınız nasıl değişir?</p>
+      <label for="yildiz-sayisi">40 denemede kaç yıldız olsun?</label>
+      <select id="yildiz-sayisi">
+        <option value="10">10 yıldız, 30 çarpı</option>
+        <option value="20">20 yıldız, 20 çarpı</option>
+        <option value="30" selected>30 yıldız, 10 çarpı</option>
+      </select>
+      <button type="button" id="strateji-hesapla">Sonucu göster</button>
+      <p id="strateji-sonucu" role="status"></p>
     </fieldset>
   </section>
   <noscript>Alıştırmayı kullanmak için JavaScript açık olmalı.</noscript>
@@ -123,6 +134,17 @@ for (const id of ['kayit', 'deneme-no']) {
   el(id).addEventListener('change', () => { el('ters-yanit').checked = false; tekDenemeGoster(); });
 }
 el('ters-yanit').addEventListener('change', tekDenemeGoster);
+const yildizSecimi = el('yildiz-sayisi');
+const stratejiSonucu = el('strateji-sonucu');
+yildizSecimi.addEventListener('change', () => { stratejiSonucu.textContent = ''; });
+el('strateji-hesapla').addEventListener('click', () => {
+  const toplam = denemeler.length;
+  const yildiz = Number(yildizSecimi.value);
+  const carpi = toplam - yildiz;
+  stratejiSonucu.textContent = 'Toplam doğruluk ' + oran(yildiz, toplam) +
+    '. Kaçırma ' + oran(0, yildiz) + '. Yanlış basma ' + oran(carpi, carpi) +
+    '. Her yıldızda doğru yanıt verdiniz, her çarpıda hata yaptınız. Toplam doğruluk bu stratejide yıldızların oranına eşittir.';
+});
 tekDenemeGoster();
 diziGoster();
 el('filtre').addEventListener('change', diziGoster);
