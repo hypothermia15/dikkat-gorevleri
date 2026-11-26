@@ -249,11 +249,12 @@ function nouvelEssaiNback() {
   aRepondu       = false;
   enAttenteNback = true;
   compteurNback.textContent = `Harf ${essaiNback + 1} / ${NOMBRE_ESSAIS_NBACK}`;
+  if (essaiNback < nSeviye) geriBildirim(feedbackNback, "Bu harfi aklınızda tutun. Henüz karşılaştırma yok.");
   timerNback = setTimeout(evaluerReponseNback, DUREE_LETTRE);
 }
 
 function reponseNback() {
-  if (!enAttenteNback || aRepondu) return;
+  if (!enAttenteNback || aRepondu || essaiNback < nSeviye) return;
   aRepondu = true;
   const estCible = diziNback[essaiNback].estCible;
   geriBildirim(feedbackNback, estCible ? "Doğru" : "Yanlış alarm", estCible ? "ok" : "hata");
@@ -265,7 +266,7 @@ function evaluerReponseNback() {
   lettrAffichee.textContent = "";
   if (estCible && !aRepondu) geriBildirim(feedbackNback, "Kaçtı", "uyar");
 
-  resultatsNback.push({ estCible, aRepondu });
+  if (essaiNback >= nSeviye) resultatsNback.push({ estCible, aRepondu });
   essaiNback++;
   timerNback = setTimeout(nouvelEssaiNback, DUREE_PAUSE);
 }
@@ -281,6 +282,7 @@ function afficherResultatsNback() {
 
   tabloYaz("tablo-nback", [
     ["Düzey", `${nSeviye}-geri`],
+    ["Puanlanan karşılaştırmalar", `${resultatsNback.length} / ${diziNback.length} harf`],
     ["İsabet (yakalanan hedef)", `${isabet} / ${cibles.length} (%${yuzde(isabet, cibles.length)})`],
     ["Kaçırılan hedef", `${cibles.length - isabet} / ${cibles.length}`],
     ["Yanlış alarm (hedef olmayana yanıt)", `${yanlisAlarm} / ${nonCibles.length} (%${yuzde(yanlisAlarm, nonCibles.length)})`]
